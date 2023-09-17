@@ -86,5 +86,14 @@ namespace TeknikMarket.CoreMVCUI.Areas.Admin.Controllers
             return View(model);
         }
 
+        [HttpPost]
+        public JsonResult ForgotPassword(ForgotPasswordViewModel model)
+        {
+
+
+
+            return Json(new { result = false, Mesaj = "asdasd" });
+        }
+
     }
 }
