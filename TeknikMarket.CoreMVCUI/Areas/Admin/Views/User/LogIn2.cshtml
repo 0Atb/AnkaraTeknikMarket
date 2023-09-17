@@ -1,0 +1,141 @@
+﻿@{
+    Layout = null;
+}
+
+@model LogInViewModel
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Teknik Market</title>
+
+    <!-- Google Font: Source Sans Pro -->
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,400i,700&display=fallback">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="/admin/plugins/fontawesome-free/css/all.min.css">
+    <!-- icheck bootstrap -->
+    <link rel="stylesheet" href="/admin/plugins/icheck-bootstrap/icheck-bootstrap.min.css">
+    <!-- Theme style -->
+    <link rel="stylesheet" href="/admin/css/adminlte.min.css">
+    <link href="~/limonte-sweetalert2/sweetalert2.css" rel="stylesheet" />
+</head>
+<body class="hold-transition login-page">
+    <div class="login-box">
+        <!-- /.login-logo -->
+        <div class="card card-outline card-primary">
+            <div class="card-header text-center">
+                <h1><b>Teknik</b>Market</h1>
+            </div>
+            <div class="card-body">
+                <p class="login-box-msg">Oturumunuzu başlatmak için oturum açın</p>
+
+                <form id="frmLogin">
+                    @Html.AntiForgeryToken()
+                    <div class="input-group mb-3">
+                        <input asp-for="Email" type="email" class="form-control" placeholder="Email">
+                        <div class="input-group-append">
+                            <div class="input-group-text">
+                                <span class="fas fa-envelope"></span>
+                            </div>
+                        </div>
+                    </div>
+                    <span asp-validation-for="Email"></span>
+                    <div class="input-group mb-3">
+                        <input asp-for="Sifre" type="password" class="form-control" placeholder="Sifre">
+                        <div class="input-group-append">
+                            <div class="input-group-text">
+                                <span class="fas fa-lock"></span>
+                            </div>
+                        </div>
+                    </div>
+                    <span asp-validation-for="Sifre"></span>
+                    <div class="row">
+                        <div class="col-8">
+                            <div class="icheck-primary">
+                                <input asp-for="BeniHatirla" type="checkbox" id="remember">
+                                <label for="remember">
+                                    Beni Hatırla
+                                </label>
+                            </div>
+                        </div>
+                        <!-- /.col -->
+                        <div class="col-4">
+                            <button id="btnLogin" type="button" class="btn btn-primary btn-block">Giriş Yap</button>
+                        </div>
+                        <!-- /.col -->
+                    </div>
+                </form>
+                
+                <p class="mb-1">
+                    <a href="/Admin/User/ForgotPassword">Şifreni Mi Unuttun?</a>
+                </p>
+            </div>
+            <!-- /.card-body -->
+        </div>
+        <!-- /.card -->
+    </div>
+    <!-- /.login-box -->
+    <!-- jQuery -->
+    <script src="/admin/plugins/jquery/jquery.min.js"></script>
+    <!-- Bootstrap 4 -->
+    <script src="/admin/plugins/bootstrap/js/bootstrap.bundle.min.js"></script>
+    <!-- AdminLTE App -->
+    <script src="/admin/js/adminlte.min.js"></script>
+
+    <script src="~/lib/jquery-validation/dist/jquery.validate.js"></script>
+    <script src="~/lib/jquery-validation-unobtrusive/jquery.validate.unobtrusive.js"></script>
+    <script src="~/limonte-sweetalert2/sweetalert2.all.js"></script>
+    <script src="~/limonte-sweetalert2/sweetalert2.js"></script>
+    <script>
+        $(document).ready(
+            function () {
+                $("#btnLogin").click(function () {
+
+                    var vm = {
+                        Email : $("#Email").val(),
+                        Sifre : $("#Sifre").val(),
+                        BeniHatirla: $("#BeniHatirla").val()
+                    }
+
+                    var form = $("#frmLogin").val();
+                    var token = $('input[name="__RequestVerificationToken"]',form).val();
+
+                    if($("#frmLogin").valid())
+                    {
+                        $.ajax({
+                            url:"/Admin/User/LogIn2",
+                            method:"post",
+                            data:{__RequestVerificationToken:token,model:vm},
+                            dataType: "json",
+                            success: function(response){
+                                if(response.result){
+                                    window.location.href = "/Admin/Home/Index"
+                                }else{
+                                    Swal.fire({
+                                        icon: 'error',
+                                        title: 'Giriş Başarısız',
+                                        text: response.mesaj
+                                    })
+                                }
+                            },
+                            error: function(){
+
+                            }
+                        });
+                    }
+                })
+            }
+        )
+
+
+
+
+
+    </script>
+
+
+
+</body>
+</html>

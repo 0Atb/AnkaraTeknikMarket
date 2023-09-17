@@ -1,0 +1,57 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Linq.Expressions;
+using System.Text;
+using System.Threading.Tasks;
+using TeknikMarket.Business.Abstract;
+using TeknikMarket.DataAccess.Abstract;
+using TeknikMarket.Model.Entity;
+
+namespace TeknikMarket.Business.Concrete
+{
+    public class FirmaBS:IFirmaBS
+    {
+        private readonly IFirmaRepository _repo;
+
+        public FirmaBS(IFirmaRepository repo)
+        {
+            _repo = repo;
+        }
+
+        public void Delete(Firma entity)
+        {
+            _repo.Delete(entity);
+        }
+
+        public void Delete(int Id)
+        {
+            _repo.Delete(Id);
+        }
+
+        public Firma Get(Expression<Func<Firma, bool>> filter, params string[] incluedelist)
+        {
+            return _repo.Get(filter, incluedelist);
+        }
+
+        public List<Firma> GetAll(Expression<Func<Firma, bool>> filter, params string[] incluedelist)
+        {
+            return _repo.GetAll(filter, incluedelist);
+        }
+
+        public Firma GetById(int Id, params string[] incluedelist)
+        {
+            return _repo.GetById(Id, incluedelist);
+        }
+
+        public void Insert(Firma entity)
+        {
+            _repo.Insert(entity);
+        }
+
+        public void Update(Firma entity)
+        {
+            _repo.Update(entity);
+        }
+    }
+}
