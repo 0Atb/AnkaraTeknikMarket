@@ -32,6 +32,7 @@ namespace TeknikMarket.CoreMVCUI
 
             //-----VALIDATION
             builder.Services.AddSingleton<IValidator<LogInViewModel>, LoginVmValidator>();
+            builder.Services.AddSingleton<IValidator<ForgotPasswordViewModel>, ForgotPasswordVmValidator>();
 
 
             var app = builder.Build();

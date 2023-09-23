@@ -1,6 +1,8 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Core.CrossCuttingConcern.MailOp;
+using Microsoft.AspNetCore.Mvc;
 using TeknikMarket.Business.Abstract;
 using TeknikMarket.Model.Entity;
+using TeknikMarket.Model.Static;
 using TeknikMarket.Model.ViewModel.Area.Admin.User;
 
 namespace TeknikMarket.CoreMVCUI.Areas.Admin.Controllers
@@ -87,12 +89,73 @@ namespace TeknikMarket.CoreMVCUI.Areas.Admin.Controllers
         }
 
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public JsonResult ForgotPassword(ForgotPasswordViewModel model)
         {
+            if (!ModelState.IsValid)
+            {
+                ViewBag.Mesaj = "işlemler Hatalı";
+                return Json(new { result = false, Mesaj = "Validasyon Hatasi Oluştu" });
+            }
+
+            Kullanici kullanici = kullanicibs.Get(x => x.Email ==model.Email && x.Adi.ToLower() == model.Adi.ToLower() && x.Soyadi.ToUpper() == model.Soyadi.ToUpper());
+
+            if (kullanici!= null)
+            {
+                MailManager.Send(kullanici.Email, "Şifre Değiştirme", "Merhaba Sayın : " + kullanici.Adi + " " + kullanici.Soyadi + "</br>Şifrenizi Değiştirmek için Lütfen <a href = '"+Keys.SITEADDRESS + "Admin/User/UpdatePassword?UniqueID="+ kullanici.UniqeuId + "'>Tıklayınız</a>");
 
 
+                return Json(new { result = true, Mesaj = "Şifre Değiştirme Linki Mail Adresinize Gönderildi.Lütfen Mailinizi Kontrol Ediniz." });
+            }
+            else
+            {
+                return Json(new { result = false, Mesaj = "Bilgileriniz Hatalı. Lütfen Yeniden Deneyiniz." });
+            }
+        }
 
-            return Json(new { result = false, Mesaj = "asdasd" });
+
+        public IActionResult UpdatePassword(string UniqueID)
+        {
+            UpdatePasswordViewModel model = new UpdatePasswordViewModel();
+            
+            model.UniqueID = UniqueID;
+
+            Kullanici kullanici = kullanicibs.Get(x => x.UniqeuId.ToString() == model.UniqueID);
+
+            if (kullanici== null)
+            {
+                return RedirectToAction("TehlikeliIslem", "Home");
+            }
+
+            return View(model);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public IActionResult UpdatePassword(UpdatePasswordViewModel model)
+        {
+            if (!ModelState.IsValid)
+            {
+                ViewBag.Mesaj = "işlemler Hatalı";
+                return Json(new { result = false, Mesaj = "Validasyon Hatasi Oluştu" });
+            }
+
+            Kullanici kullanici = kullanicibs.Get(x => x.UniqeuId.ToString() == model.UniqueID);
+            if (kullanici != null && model.Sifre == model.SifreTekrar)
+            {
+                kullanici.UniqeuId = Guid.NewGuid();
+                kullanici.Sifre = model.Sifre;
+
+                kullanicibs.Update(kullanici);
+
+                return Json(new { result = true ,Mesaj = "Şifreniz Başarıyla Güncellendi. Giriş Yapabilirisiniz." });
+            }
+            else
+            {
+                return Json(new { result = true, Mesaj = "Ip Adresiniz Kayıt Ediliyor. Lütfen Yetkisiz İşlem Yapmayınız." });
+            }
+
+
         }
 
     }
