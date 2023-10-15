@@ -13,7 +13,7 @@ namespace TeknikMarket.Model.ViewModel.Area.Admin.Kategories
         public int Id { get; set; }
         public string KategoriAdi { get; set; }
         public int UstKategoriId { get; set; }
-        public string KategoriAdiGorunumu { get; set; }
+        public string KategoriAdiGorunum { get; set; }
         public int? Sira { get; set; }
         public bool Aktif { get; set; }
 

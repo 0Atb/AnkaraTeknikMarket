@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using TeknikMarket.Business.Abstract;
+using TeknikMarket.Business.Concrete;
 using TeknikMarket.CoreMVCUI.Areas.Admin.Filter;
 using TeknikMarket.Model.Entity;
 using TeknikMarket.Model.ViewModel.Area.Admin;
@@ -133,7 +134,27 @@ namespace TeknikMarket.CoreMVCUI.Areas.Admin.Controllers
             return Json(new { result = true, mesaj = "Kategori Başarıyla Güncellendi.", kategoriListesi= kategories});
         }
 
+        public IActionResult Aktiflik(int KategoriId,bool Aktiflik)
+        {
+            Kategori k = kategoriBS.Get(x=>x.Id== KategoriId);
+            if (k!=null)
+            {
+                k.Aktif = Aktiflik;
+                kategoriBS.Update(k);
+            }
 
+            string mesaj = "";
 
+            if (k.Aktif)
+            {
+                mesaj = "Kategori Başarıyla Aktifleştirildi";
+            }
+            else
+            {
+                mesaj = "Kategori Başarıyla Pasifleştirildi";
+            }
+            return Json(new { result = true,mesaj = mesaj});
+
+        }
     }
 }
