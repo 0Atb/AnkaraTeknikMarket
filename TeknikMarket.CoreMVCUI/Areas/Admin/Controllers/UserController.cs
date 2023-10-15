@@ -1,6 +1,9 @@
-﻿using Core.CrossCuttingConcern.MailOp;
+﻿using Core.CrossCuttingConcern.Crypto;
+using Core.CrossCuttingConcern.MailOp;
 using Microsoft.AspNetCore.Mvc;
 using TeknikMarket.Business.Abstract;
+using TeknikMarket.CoreMVCUI.Areas.Admin.Filter;
+using TeknikMarket.CoreMVCUI.Extensions;
 using TeknikMarket.Model.Entity;
 using TeknikMarket.Model.Static;
 using TeknikMarket.Model.ViewModel.Area.Admin.User;
@@ -10,11 +13,13 @@ namespace TeknikMarket.CoreMVCUI.Areas.Admin.Controllers
     [Area("Admin")]
     public class UserController : Controller
     {
-        IKullaniciBS kullanicibs;
+        private readonly IKullaniciBS kullanicibs;
+        private readonly ISessionManager sessionManager;
 
-        public UserController(IKullaniciBS kullanicibs)
+        public UserController(IKullaniciBS kullanicibs, ISessionManager sessionManager)
         {
             this.kullanicibs = kullanicibs;
+            this.sessionManager = sessionManager;
         }
 
         public IActionResult LogIn()
@@ -66,11 +71,19 @@ namespace TeknikMarket.CoreMVCUI.Areas.Admin.Controllers
                 return Json(new { result = false, Mesaj = "Validasyon Hatasi Oldu." });
             }
 
+            string sifre = CryptoManager.MD5Encrypt(CryptoManager.SHA1Encrypt(model.Sifre));
 
-            Kullanici kullanici = kullanicibs.Get(x=>x.Email == model.Email && x.Sifre==model.Sifre && x.Aktif == true);
+            Kullanici kullanici = kullanicibs.Get(x=>x.Email == model.Email && x.Sifre== sifre && x.Aktif == true, "KullaniciRols", "KullaniciRols.Rol");
 
             if (kullanici != null)
             {
+
+                //HttpContext.Session["admin"] = 123233;
+                //HttpContext.Session.SetObject("AktifKullanici", kullanici);
+
+
+                sessionManager.AktifKullanici = kullanici;
+
                 return Json(new { result = true, Mesaj = "Giriş Başarılı" });
             }
             else
@@ -144,7 +157,7 @@ namespace TeknikMarket.CoreMVCUI.Areas.Admin.Controllers
             if (kullanici != null && model.Sifre == model.SifreTekrar)
             {
                 kullanici.UniqeuId = Guid.NewGuid();
-                kullanici.Sifre = model.Sifre;
+                kullanici.Sifre = CryptoManager.MD5Encrypt(CryptoManager.SHA1Encrypt(model.Sifre));
 
                 kullanicibs.Update(kullanici);
 
@@ -154,9 +167,22 @@ namespace TeknikMarket.CoreMVCUI.Areas.Admin.Controllers
             {
                 return Json(new { result = true, Mesaj = "Ip Adresiniz Kayıt Ediliyor. Lütfen Yetkisiz İşlem Yapmayınız." });
             }
-
-
         }
 
+        public IActionResult LogOut()
+        {
+            sessionManager.AktifKullanici = null;
+
+
+            return RedirectToAction("LogIn2", "User");
+        }
+
+        public IActionResult NonAuthentication()
+        {
+
+
+
+            return View();
+        }
     }
 }

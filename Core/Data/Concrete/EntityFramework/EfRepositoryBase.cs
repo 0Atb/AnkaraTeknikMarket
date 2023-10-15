@@ -49,7 +49,7 @@ namespace Core.Data.Concrete.EntityFramework
             }
         }
 
-        public List<Entity> GetAll(Expression<Func<Entity, bool>> filter, params string[] includelist)
+        public List<Entity> GetAll(Expression<Func<Entity, bool>> filter = null, params string[] includelist)
         {
             using (TContext ctx = new TContext())
             {

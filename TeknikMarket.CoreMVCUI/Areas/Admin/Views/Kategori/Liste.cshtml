@@ -1,0 +1,224 @@
+﻿@using TeknikMarket.Model.Entity;
+
+@{
+    ViewData["Title"] = "Liste";
+    Layout = "~/Areas/Admin/Views/Shared/_Layout.cshtml";
+}
+
+@model KategoriListeViewModel
+
+
+
+
+
+
+<!-- Main content -->
+<section class="content">
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header">
+                        <p class="card-title">Kategori Listesi</p>
+                        <a style="margin-left:1300px;" onclick="KategoriModalShow();" class="btn btn-primary">Kategori Ekle</a>
+                    </div>
+                    <!-- /.card-header -->
+                    <div class="card-body">
+                        <table id="example2" class="table table-bordered table-hover">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Kategori Adi</th>
+                                    <th>Kategori Görünümü</th>
+                                    <th>Aktiflik</th>
+                                    <th>Sıra</th>
+                                    <th></th>
+                                    <th></th>
+                                </tr>
+                            </thead>
+                            <tbody id="tblKategoriler">
+
+                                @foreach (Kategori item in Model.KategoriListesi)
+                                {
+                                    <tr>
+                                        <td>@item.Id</td>
+                                        <td>@item.KategoriAdi</td>
+                                        <td>@item.KategoriGorunum</td>
+                                        <td>
+                                            @if (item.Aktif)
+                                            {
+                                                <input type="checkbox" kategoriid="@item.Id" class="Aktif" checked name="my-checbox" data-bootstrap-switch data-off-colr="danger" data-on-color="success" />
+                                            }
+                                            else
+                                            {
+                                                <input type="checkbox" kategoriid="@item.Id" class="Aktif" name="my-checbox" data-bootstrap-switch data-off-colr="danger" data-on-color="success" />
+                                            }
+                                        </td>
+                                        <td>@item.Sira</td>
+                                        <td><a kategoriid="@item.Id" class="btn btn-primary btnDuzenle">Düzenle</a></td>
+                                        <td><a kategoriid="@item.Id" class="btn btn-danger btnSil">Sil</a></td>
+                                    </tr>
+                                }
+
+                            </tbody>
+                        </table>
+                    </div>
+                    <!-- /.card-body -->
+                </div>
+                <!-- /.card -->
+
+
+            </div>
+            <!-- /.col -->
+        </div>
+        <!-- /.row -->
+    </div>
+    <!-- /.container-fluid -->
+</section>
+<!-- /.content -->
+<!-- Modal -->
+<form id="frmKategoriEkle">
+    @Html.AntiForgeryToken()
+    <div class="modal fade" id="AddKategoriModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLabel">Kategori Ekle</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="card-body">
+
+
+                        <div class="form-group">
+                            <label>Kategori Adi</label>
+                            <input type="text" asp-for="KategoriAdi" class="form-control" placeholder="Kategori Adi" />
+                        </div>
+
+                        <div class="form-group">
+                            <label>Ust Kategorisi</label>
+                            <select type="text" asp-for="UstKategoriId" class="form-control" asp-items="Model.KategoriSelectList">
+                            </select>
+                        </div>
+                        
+                        <div class="form-check">
+                            <label class="form-check-label">Aktif</label>
+                            <br />
+                            <input type="checkbox" asp-for="Aktif" class="form-check-input" data-bootstrap-switch data-off-color="danger" on-color="success" >
+                        </div>
+                        <br />
+                        <div class="form-group">
+                            <label>Sıra</label>
+                            <input type="text" asp-for="Sira" class="form-control"/>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Kapat</button>
+                    <button type="button" id="btnKategoriEkle" class="btn btn-primary">Kayıt Et</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>
+
+
+
+
+
+
+
+
+
+
+
+@section Scripts{
+    <script>
+        $(function () {
+            $('#example2').DataTable({
+                "paging": true,
+                "lengthChange": true,
+                "searching": true,
+                "ordering": true,
+                "info": true,
+                "autoWidth": false,
+                "responsive": true,
+                "buttons": ["copy", "csv", "excel", "pdf", "print", "colvis"],
+                "lengthMenu": [
+                    [5, 10, 25, 50, -1]
+                    [5, 10, 25, 50, 'All']
+                ],
+                "language": {
+                    "url": "adminassets/json/datatables_turkce.json"
+                },
+            });
+
+        });
+
+
+        function KategoriModalShow() {
+            $("#AddKategoriModal").modal("show");
+        }
+        $(document).ready(function() {
+
+            $(document).on("click","#btnKategoriEkle",function () {
+                var model = $("#frmKategoriEkle").serialize();
+
+                $.ajax({
+                    url:"/Admin/Kategori/Add",
+                    method: "post",
+                    dataType:"json",
+                    data : model,
+                    success: function (r) {
+                        if (r.result) {
+
+                            var table = "";
+                            var options = "<option value='-1'>Lütfen Kategori Seçiniz...</option>";
+
+                            for (var i = 0; i < r.kategoriListesi.length; i++) {
+
+                                table += "<tr><td>" + r.kategoriListesi[i].id + "</td> <td>" + r.kategoriListesi[i].kategoriAdi + "</td> <td>" + r.kategoriListesi[i].kategoriAdiGorunumu + "</td><td> ";
+
+                                if (r.kategoriListesi[i].aktif) {
+                                    table += "<input type='checkbox' kategoriid = '" + r.kategoriListesi[i].id + "' class='Aktiflik' checked name='my-checkbox' data-bootstrap-switch data-off-color='danger' data-on-color='success' >";
+                                }
+                                else {
+                                    table += "<input type='checkbox' kategoriid = '" + r.kategoriListesi[i].id + "' class='Aktiflik'  name='my-checkbox' data-bootstrap-switch data-off-color='danger' data-on-color='success' >";
+
+                                }
+                                table += "</td><td>" + r.kategoriListesi[i].sira + "</td><td><a kategoriid='" + r.kategoriListesi[i].id + "' class='btn btn-primary btnDuzenle'> DÜZENLE </a></td> <td><a kategoriid='" + r.kategoriListesi[i].id + "' class='btn btn-danger btnSil'> SİL </a></td></tr>";
+
+
+                                options += "<option value='" + r.kategoriListesi[i].id + "'>" + r.kategoriListesi[i].kategoriAdiGorunumu + "</option>";
+
+
+                            }
+                            $("#tblKategoriler").html(table);
+                            $("#UstKategoriId").html(options);
+
+                            $("#Sira").val(r.sira);
+                            //$("input[data-bootstrap-switch]").each(function () {
+                            //    $(this).bootstrapSwitch('state', $(this).prop('checked'));
+                            //})
+
+                            Swal.fire(
+                                'Başarılı!',
+                                r.mesaj,
+                                'success'
+                            )
+                        }
+                    },
+                    error: function () {
+
+                    }
+                });
+            });
+
+
+        });
+
+    </script>
+
+}
