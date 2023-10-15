@@ -95,8 +95,45 @@ namespace TeknikMarket.CoreMVCUI.Areas.Admin.Controllers
 
             List<Kategori> kategories = kategoriBS.GetAll();
 
-            return Json(new { result = true, mesaj = "Kategori Başarıyla Eklendi.",kategoriListesi=kategories });
-
+            return Json(new { result = true, mesaj = "Kategori Başarıyla Eklendi.", kategoriListesi = kategories });
         }
+
+        public IActionResult GetById(int KategoriId)
+        {
+            Kategori kategori = kategoriBS.Get(x=>x.Id== KategoriId);
+            List<Kategori> kategories = kategoriBS.GetAll();
+
+            return Json(new { result = true,kategori = kategori,kategoriListesi=kategories });
+        }
+
+        public IActionResult Update(KategoriListeViewModel model)
+        {
+            Kategori kategori = mapper.Map<Kategori>(model);
+            if (model.UstKategoriId != -1)
+            {
+                Kategori ustkategori = kategoriBS.Get(x => x.Id == model.UstKategoriId);
+
+                kategori.KategoriGorunum = ustkategori.KategoriGorunum + " > " + model.KategoriAdi;
+
+            }
+            else
+            {
+                kategori.KategoriGorunum = model.KategoriAdi;
+            }
+
+            kategori.Aktif = model.Aktif;
+            kategori.Sira = model.Sira;
+            kategori.OlusturmaTarihi = DateTime.Now;
+            kategori.GuncellemeTarihi = DateTime.Now;
+
+            kategoriBS.Update(kategori);
+
+            List<Kategori> kategories = kategoriBS.GetAll();
+
+            return Json(new { result = true, mesaj = "Kategori Başarıyla Güncellendi.", kategoriListesi= kategories});
+        }
+
+
+
     }
 }
